@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+
+  migrator:
+    build:
+      context: .
+      dockerfile: migrator/Dockerfile
+      args:
+        PROJECT: migrator
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/schema-1
+    entrypoint: [ "./wait-for-it.sh", "mysql:3306", "--", "bin/migrator" ]
+    depends_on:
+      - mysql
+
+  mysql:
+    image: mysql:8.0.31
+    container_name: flyway-migrator
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: schema-1
+    ports:
+      - 3306:3306
+    command: --default-authentication-plugin=mysql_native_password --max_allowed_packet=256000000
